@@ -11,6 +11,21 @@ export default function ChatBox() {
     const [typedMessage, setTypedMessage] = useState<string>("")
     const username = useAppSelector(selectUsername)
     const webSocketState = useAppSelector(selectWebSocket)
+    const [onlineUsersCount, setOnlineUsersCount] = useState<number>(0);
+
+    useEffect(() => {
+            const unsubscribe = subscribeToOnlineUsersCount();
+            return () => {
+                unsubscribe();
+            };
+        }, []);
+
+        const subscribeToOnlineUsersCount = () => {
+            return stompClient.subscribe("/topic/onlineUsersCount", (onlineUsersCount) => {
+                setOnlineUsersCount(Number(onlineUsersCount.body));
+            });
+        };
+
     return (
         <>
             <div className="bg-white w-full rounded-lg shadow-lg p-4">

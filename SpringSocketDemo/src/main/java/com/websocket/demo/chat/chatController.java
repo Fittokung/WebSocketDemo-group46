@@ -13,11 +13,19 @@ public class chatController {
     public ChatMessage sendMessage(ChatMessage chatMessage) {
         return chatMessage;
     }
+    private AtomicInteger onlineUsersCount = new AtomicInteger(0);
+
 
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public")
     public ChatMessage addUser(ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
         headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
+        onlineUsersCount.incrementAndGet();
+        broadcastOnlineUsersCount();
         return chatMessage;
+    }
+
+    private void broadcastOnlineUsersCount() {
+        messagingTemplate.convertAndSend("/topic/onlineUsersCount", onlineUsersCount.get());
     }
 }
